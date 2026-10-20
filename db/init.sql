@@ -1,0 +1,47 @@
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(120) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS cart_items (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  product_id INTEGER NOT NULL,
+  quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity BETWEEN 1 AND 20),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(user_id, product_id)
+);
+CREATE TABLE IF NOT EXISTS wishlist_items (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  product_id INTEGER NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(user_id, product_id)
+);
+CREATE TABLE IF NOT EXISTS orders (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  order_number VARCHAR(32) UNIQUE NOT NULL,
+  customer_name VARCHAR(120) NOT NULL,
+  phone VARCHAR(10) NOT NULL,
+  address TEXT NOT NULL,
+  payment_method VARCHAR(60) NOT NULL,
+  subtotal NUMERIC(10,2) NOT NULL,
+  delivery NUMERIC(10,2) NOT NULL,
+  total NUMERIC(10,2) NOT NULL,
+  status VARCHAR(60) NOT NULL DEFAULT 'Demo order placed',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+ALTER TABLE orders
+ADD COLUMN IF NOT EXISTS order_number VARCHAR(32);
+CREATE TABLE IF NOT EXISTS order_items (
+  id SERIAL PRIMARY KEY,
+  order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  product_id INTEGER NOT NULL,
+  product_name VARCHAR(180) NOT NULL,
+  price NUMERIC(10,2) NOT NULL,
+  quantity INTEGER NOT NULL CHECK (quantity BETWEEN 1 AND 20)
+);
+CREATE INDEX IF NOT EXISTS idx_orders_user_created ON orders(user_id, created_at DESC);

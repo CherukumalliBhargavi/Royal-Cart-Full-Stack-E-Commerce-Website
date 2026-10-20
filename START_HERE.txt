@@ -1,0 +1,1 @@
+Start here: read ../README.md. Run npm install in this folder, copy .env.example to .env, create PostgreSQL database royalcart, run db/init.sql, then npm run dev.
